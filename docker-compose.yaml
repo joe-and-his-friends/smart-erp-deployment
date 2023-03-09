@@ -1,0 +1,64 @@
+services:
+  services:
+    image: asing1elife/serp-services
+    container_name: services
+    env_file:
+      - ./.env
+    restart: on-failure
+
+  webapp:
+    image: binartist/serp-webapp
+    container_name: webapp
+    volumes:
+      - ./serp_webapp:/var/www
+
+  swag:
+    image: lscr.io/linuxserver/swag
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    env_file:
+      - ./pk.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VALIDATION=http
+    volumes:
+      - ./config:/config
+      - ./serp_webapp:/var/serp_webapp
+    ports:
+      - 443:443
+      - 80:80
+    restart: on-failure
+
+  mysql:
+    image: mysql
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: smartErp@Jan11
+    volumes:
+      - ./data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    links:
+      - "mysql:db"
+
+  redis:
+    image: redis:alpine
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+      - SLAVE_READ_ONLY=no
+    container_name: redis
+    restart: on-failure
+
+networks:
+  default:
+    name: serp-network
