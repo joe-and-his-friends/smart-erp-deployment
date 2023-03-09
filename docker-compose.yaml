@@ -18,7 +18,7 @@ services:
     cap_add:
       - NET_ADMIN
     env_file:
-      - ./pk.env
+      - ./.env
     environment:
       - PUID=1000
       - PGID=1000
